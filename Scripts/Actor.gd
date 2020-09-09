@@ -1,13 +1,13 @@
 extends KinematicBody2D
 class_name Actor
 
-export var MAX_JUMP_TIME = 0.3
+export var MAX_JUMP_TIME = 0.35
 
 export var velocity = Vector2(0,0)
-export var gravity = 1000
+export var gravity = 4400
 export var max_jumps = 1
-export var jump_power = Vector2(50, -400)
-export var hit_power = 500
+export var jump_power = Vector2(450, -500)
+export var hit_power = 900
 
 var jump_unlocked = false
 var ball_in_range = false
