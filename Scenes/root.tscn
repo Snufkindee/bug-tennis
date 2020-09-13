@@ -869,6 +869,7 @@ points = PoolVector2Array( 0, 0, 62, 0, 62, 63, 0, 63 )
 position = Vector2( 200.541, 476.255 )
 collision_mask = 2
 script = ExtResource( 2 )
+set_dashing = true
 jump_key = "jump"
 left_key = "left"
 right_key = "right"

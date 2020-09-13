@@ -7,12 +7,12 @@ const MAX_SPEED = 500
 const DASH_SPEED = 2000
 export (float, 0, 1.0) var friction = 0.25
 export (float, 0, 1.0) var acceleration = 0.25
+export var set_dashing = false
 
 var motion = Vector2()
 var current_speed = 0
-var running = false
 var current_direction = 0
-export var set_dashing = false
+var running = false
 var dash = false
 
 # Jumping
