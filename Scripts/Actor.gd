@@ -4,6 +4,7 @@ class_name Actor
 # Movement
 const MOVEMENT_SPEED = 300
 const MAX_SPEED = 500
+const DASH_SPEED = 2000
 export (float, 0, 1.0) var friction = 0.25
 export (float, 0, 1.0) var acceleration = 0.25
 
@@ -11,6 +12,8 @@ var motion = Vector2()
 var current_speed = 0
 var running = false
 var current_direction = 0
+export var set_dashing = false
+var dash = false
 
 # Jumping
 const MAX_JUMP_TIME = 1
@@ -72,7 +75,11 @@ func get_input():
 		
 	if current_direction != 0:
 		get_run()
-		motion.x = lerp(motion.x, current_direction * current_speed, acceleration)
+		if !dash:
+			motion.x = lerp(motion.x, current_direction * current_speed, acceleration)
+		else:
+			motion.x = lerp(motion.x, current_direction * DASH_SPEED, 1)
+			dash = false
 	else:
 		motion.x = lerp(motion.x, 0, friction)
 		
@@ -85,11 +92,15 @@ func get_hit_input():
 		
 func get_run():
 	current_speed = MOVEMENT_SPEED
-	if Input.is_action_pressed("run"):
-		current_speed = MAX_SPEED
-		running = true
+	if !set_dashing:
+		if Input.is_action_pressed("run"):
+			current_speed = MAX_SPEED
+			running = true
+		else:
+			running = false
 	else:
-		running = false
+		if Input.is_action_just_pressed("run"):
+			dash = true
 	
 		
 func set_animation(animation):
