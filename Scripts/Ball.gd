@@ -1,7 +1,7 @@
 extends KinematicBody2D
 class_name Ball
 
-export var velocity = Vector2(0,0)
+export var momentum = Vector2(0,0)
 export var gravity = 500
 
 var collision_info
@@ -14,8 +14,8 @@ enum DIRECTION {
 export var current_direction = DIRECTION.right;
 
 func _physics_process(delta: float) -> void:
-	velocity.y += gravity * delta
-	collision_info = move_and_collide(velocity * delta)
+	momentum.y += gravity * delta
+	collision_info = move_and_collide(momentum * delta)
 	
 	check_collision()
 
@@ -23,14 +23,14 @@ func _physics_process(delta: float) -> void:
 func check_collision():
 	# Collide with ground
 	if collision_info and collision_info.normal.y == -1:
-		velocity.y *= -1
+		momentum.y *= -1
 		
 	if collision_info and collision_info.normal.y == 1:
-		velocity.y = 0
+		momentum.y = 0
 		
 	# Collide with wall
 	if collision_info and collision_info.normal.x != 0:
-		velocity.x *= -1
+		momentum.x *= -1
 		
 		if current_direction == DIRECTION.right:
 			current_direction = DIRECTION.left

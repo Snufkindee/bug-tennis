@@ -1,27 +1,40 @@
 extends KinematicBody2D
 class_name Actor
 
-export var MAX_JUMP_TIME = 1
-export var FALL_FACTOR = 1
-export var LOW_JUMP_FACTOR = 1
-export var MOVEMENT_SPEED = 300
-export var GRAVITY = 30
-export var max_jumps = 1
-export var hit_power = 900
+# Movement
+const MOVEMENT_SPEED = 300
+const MAX_SPEED = 500
 export (float, 0, 1.0) var friction = 0.25
 export (float, 0, 1.0) var acceleration = 0.25
 
-
-
 var motion = Vector2()
+var current_speed = 0
+var running = false
+var current_direction = 0
+
+# Jumping
+const MAX_JUMP_TIME = 1
+const FALL_FACTOR = 1
+const LOW_JUMP_FACTOR = 1
+
+var max_jumps = 1
+var jump_force = 800
 var jump_unlocked = false
+
+# Hitting
+var hit_power = 900
 var ball_in_range = false
 var can_hit = true
+
+# Physics
+var GRAVITY = 30
+
+# Nodes
 onready var ball = get_parent().get_node("Ball")
 onready var animation_player = get_node("Sprite/AnimationPlayer")
+onready var sprite = get_node("Sprite")
 
-export var current_direction = 0
-
+# Buttons
 export var jump_key = "" # Assigned in editor
 export var left_key = "" # Assigned in editor
 export var right_key = "" # Assigned in editor
@@ -30,36 +43,57 @@ export var run_key = "" # Assigned in editor
 
 func _physics_process(_delta: float) -> void:
 	get_input()
-	jump()
+	get_jump()
+	
 	motion.y += GRAVITY
 	motion = move_and_slide(motion, Vector2(0, -1))
-
-
 	
-func jump():
+func get_jump():
 	if motion.y > 0:
 		motion += Vector2.UP * -GRAVITY * FALL_FACTOR
 	elif motion.y < 0 and !Input.is_action_pressed("jump"):
 		motion += Vector2.UP * -GRAVITY * LOW_JUMP_FACTOR
 		
 	if is_on_floor():
-		animation_player.play("PlayerIdle")
+		set_animation("PlayerIdle")
 		if Input.is_action_just_pressed("jump"):
-			motion.y = -800
-			animation_player.play("PlayerJump")
+			motion.y -= jump_force
+			set_animation("PlayerJump")
 
 func get_input():
 	current_direction = 0
 	if Input.is_action_pressed(left_key):
+		sprite.set_scale(Vector2(-1,1))
 		current_direction = -1
 	
 	if Input.is_action_pressed(right_key):
+		sprite.set_scale(Vector2(1,1))
 		current_direction = 1
 		
 	if current_direction != 0:
-		motion.x = lerp(motion.x, current_direction * MOVEMENT_SPEED, acceleration)
+		get_run()
+		motion.x = lerp(motion.x, current_direction * current_speed, acceleration)
 	else:
 		motion.x = lerp(motion.x, 0, friction)
+		
+	get_hit_input()
+	
+func get_hit_input():
+	if ball_in_range and Input.is_action_pressed("hit") and !running:
+		ball.momentum = Vector2(ball.transform.origin - transform.origin).normalized() * hit_power
+		ball_in_range = false
+		
+func get_run():
+	current_speed = MOVEMENT_SPEED
+	if Input.is_action_pressed("run"):
+		current_speed = MAX_SPEED
+		running = true
+	else:
+		running = false
+	
+		
+func set_animation(animation):
+	animation_player.play(animation)
 	
 
 func _on_Range_body_entered(body: Node2D) -> void:
