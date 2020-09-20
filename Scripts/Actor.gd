@@ -35,6 +35,7 @@ var GRAVITY = 30
 # Nodes
 onready var ball = get_parent().get_node("Ball")
 onready var animation_player = get_node("Sprite/AnimationPlayer")
+onready var animation_tree = get_node("Sprite/AnimationTree")
 onready var sprite = get_node("Sprite")
 
 # Buttons
@@ -45,6 +46,8 @@ export var hit_key = "" # Assigned in editor
 export var run_key = "" # Assigned in editor
 
 func _physics_process(_delta: float) -> void:
+	
+	animate_aiming_angle()
 	get_input()
 	get_jump()
 	
@@ -58,19 +61,19 @@ func get_jump():
 		motion += Vector2.UP * -GRAVITY * LOW_JUMP_FACTOR
 		
 	if is_on_floor():
-		set_animation("PlayerIdle")
+		#set_animation("PlayerIdle")
 		if Input.is_action_just_pressed("jump"):
 			motion.y -= jump_force
-			set_animation("PlayerJump")
+			#set_animation("PlayerJump")
 
 func get_input():
 	current_direction = 0
 	if Input.is_action_pressed(left_key):
-		sprite.set_scale(Vector2(-1,1))
+		#sprite.set_scale(Vector2(-1,1))
 		current_direction = -1
 	
 	if Input.is_action_pressed(right_key):
-		sprite.set_scale(Vector2(1,1))
+		#sprite.set_scale(Vector2(1,1))
 		current_direction = 1
 		
 	if current_direction != 0:
@@ -86,6 +89,8 @@ func get_input():
 	get_hit_input()
 	
 func get_hit_input():
+	if Input.is_action_pressed("hit"):
+		animation_tree.set("parameters/Swing/active", true)
 	if ball_in_range and Input.is_action_pressed("hit") and !running:
 		ball.momentum = Vector2(ball.transform.origin - transform.origin).normalized() * hit_power
 		ball_in_range = false
@@ -106,6 +111,25 @@ func get_run():
 func set_animation(animation):
 	animation_player.play(animation)
 	
+
+func animate_aiming_angle():
+	var aim_angle = Vector2()
+	var flip_dir
+	aim_angle = transform.origin.angle_to_point(ball.transform.origin) / PI
+	if aim_angle >= 0.5: #Directions between right & up
+		flip_dir = 1
+		aim_angle = 1.5 - aim_angle
+	elif aim_angle < -0.5: #Directions between right & down
+		flip_dir = 1
+		aim_angle = -0.5 - aim_angle
+	elif aim_angle >= 0 and aim_angle < 0.5: #Directions between left & up
+		flip_dir = -1
+		aim_angle = 0.5 + aim_angle
+	elif aim_angle < 0 and aim_angle >= -0.5: #Directions between left & down
+		flip_dir = -1
+		aim_angle = 0.5 + aim_angle
+	sprite.set_scale(Vector2(flip_dir,1))
+	animation_tree.set("parameters/Aim_grounded/seek_position", aim_angle)
 
 func _on_Range_body_entered(body: Node2D) -> void:
 	if body.name == "Ball":
