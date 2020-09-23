@@ -3,6 +3,7 @@ class_name Ball
 
 export var momentum = Vector2(0,0)
 export var gravity = 500
+onready var sprite = get_node("Sprite")
 
 var collision_info
 
@@ -16,8 +17,8 @@ export var current_direction = DIRECTION.right;
 func _physics_process(delta: float) -> void:
 	momentum.y += gravity * delta
 	collision_info = move_and_collide(momentum * delta)
-	
 	check_collision()
+	sprite.rotation += 0.2
 
 
 func check_collision():
